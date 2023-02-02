@@ -12,13 +12,6 @@ interface ProductObject {
   filed?: any;
 }
 
-export const getAllProductsStatic = async (req: Request, res: Response) => {
-  const products = await Product.find({ price: { $gt: 30, $lt: 100 } }).select(
-    "price"
-  );
-  res.status(200).json({ nbHits: products.length, products });
-};
-
 export const getAllProducts = async (req: Request, res: Response) => {
   const { featured, company, name, sort, fields, numericFilters } = req.query;
 
