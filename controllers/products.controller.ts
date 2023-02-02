@@ -9,16 +9,18 @@ interface ProductObject {
   rating?: Number;
   createdAt?: String;
   company?: String;
-  __v?: Number;
+  filed?: any;
 }
 
 export const getAllProductsStatic = async (req: Request, res: Response) => {
-  const products = await Product.find({}).select("price").limit(5).skip(1);
+  const products = await Product.find({ price: { $gt: 30, $lt: 100 } }).select(
+    "price"
+  );
   res.status(200).json({ nbHits: products.length, products });
 };
 
 export const getAllProducts = async (req: Request, res: Response) => {
-  const { featured, company, name, sort, fields } = req.query;
+  const { featured, company, name, sort, fields, numericFilters } = req.query;
 
   const queryObject: ProductObject = {};
 
@@ -31,9 +33,35 @@ export const getAllProducts = async (req: Request, res: Response) => {
   if (name) {
     queryObject.name = { $regex: name as string, $options: "i" };
   }
-
+  if (numericFilters) {
+    const operatorMap: any = {
+      ">": "$gt",
+      ">=": "$gte",
+      "=": "$eq",
+      "<=": "$lte",
+      "<": "$lt",
+    };
+    const regEx = /\b(<|>|<=|>=|=)\b/g;
+    let filters: string | void = (numericFilters as string).replace(
+      regEx,
+      (match) => {
+        return `-${operatorMap[match]}-`;
+      }
+    );
+    const options = ["price", "rating"];
+    filters = filters.split(",").forEach((item) => {
+      const [field, operator, value] = item.split("-");
+      if (options.includes(field)) {
+        queryObject[field as keyof ProductObject] = {
+          [operator]: Number(value),
+        };
+      }
+    });
+  }
+  console.log(queryObject);
   let result = Product.find(queryObject);
 
+  //sort
   if (sort) {
     const sortList = (sort as string).split(",").join(" ");
     result = result.sort(sortList);

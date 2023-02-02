@@ -1,6 +1,9 @@
-# In this api
+# testing MongoDB and mongoose
 
-The back-end does all the heavy lifting like searching, sorting etc... while the front end only has to make http calls
+Filter, search and sort through products with the use of mongoose and mongodb querries in this api
 
-Filtering(name, company and other)
-Sorting(ascending and descending)
+-Filtering(name, company and other)
+-Sorting(ascending and descending)
+-Searching using regex
+
+in reference to hackernews's search api
